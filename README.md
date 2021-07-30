@@ -18,7 +18,7 @@ Minecraft Texture Upscaler is built on **Python** and OpenCV's **contrib** modul
 2. Install OpenCV with `pip install opencv`
 3. Install OpenCV Contrib Modules with `pip install opencv-contrib-python`
 4. Install Pillow: `pip install pillow`
-5. Put the code where your textures are stored.
+5. Put the code(just texturepack.py for now) where your textures are stored.
 6. Download the Super Resolution models [here](https://1drv.ms/u/s!AqCfKwE9L_nAgZYzRBuM8rTIHD2DrA?e=dyT3yp) and put it in the same folder. 
 7. Run texturepack.py, put in the required information, and enjoy! 
 
@@ -28,7 +28,10 @@ Notes:
 * The ESPCN model supports x2, x3, and x4 upscaling.
 * The FSRCNN model also supports x2, x3 and x4 upscaling.
 * The LapSRN model supports x2, x4, x8 upscaling.
-* By default, the program tries to use CUDA, which will only work with an Nvidia GPU. If you do not have CUDA it will fall back to using the CPU, which is slower.
+* By default, the program tries to use CUDA bindings, which will only work if you have compiled OpenCV from source with the appropriate flags, and will only work with an Nvidia GPU. If you do not have CUDA it will fall back to using the CPU, which is slower.
+
+## Contributing
+Don't hesitate to submit an issue with an questions or concerns, or PRs with new functionality! Contributing is welcomed and appreciated!
 
 ## References
 [Deep Learning based Super Resolution with OpenCV](https://towardsdatascience.com/deep-learning-based-super-resolution-with-opencv-4fd736678066)
