@@ -12,9 +12,7 @@ import zipfile
 import json
 import shutil
 
-def downscale():
-    # path = "E://Minecraft//[512x] SCC Photo Realistic Universe Pack 2.2//assets//minecraft/textures//"
-    path = "e:/Minecraft/newpack512/assets/minecraft/mcpatcher/"
+def downscale(path): # Legacy
 
     imgs = glob.glob(path+ "/**/*.png",recursive=True)
 
@@ -49,7 +47,7 @@ def upscale(scalefactor=4, algo="EDSR", use_cuda=True):
 
     for i,img in enumerate(imgs):
         oldtime = time.time()
-        image = cv2.imread(img)
+        image = cv2.imread(img, cv2.IMREAD_UNCHANGED)
         newimg = sr.upsample(image)
         cv2.imwrite(img, newimg)
         print(f"Spent {time.time() - oldtime} seconds upscaling {img}")
