@@ -11,6 +11,7 @@ import time
 import zipfile
 import json
 import shutil
+import gc
 
 def downscale(path): # Legacy
 
@@ -46,19 +47,38 @@ def upscale(scalefactor=4, algo="EDSR", use_cuda=True):
     imgs = glob.glob(path+ "/**/*.png",recursive=True)
 
     for i,img in enumerate(imgs):
-        try:
-            oldtime = time.time()
-            alpha = cv2.split(cv2.imread(img, cv2.IMREAD_UNCHANGED))[-1]
-            image = cv2.imread(img)
-            newimg = sr.upsample(image)
-            newalpha = cv2.resize(alpha, (alpha.shape[0]*scalefactor, alpha.shape[1]*scalefactor), interpolation=cv2.INTER_CUBIC)
-            r,g,b = cv2.split(newimg)
-            newimg = cv2.merge([r,g,b,newalpha])
-            cv2.imwrite(img, newimg)
-            print(f"Spent {time.time() - oldtime} seconds upscaling {img}")
-        except:
-            print(f"Error with {img}. Skipping.")
-            continue
+        if len(cv2.split(cv2.imread(img, cv2.IMREAD_UNCHANGED))) == 4: # Image has alpha channel
+            try:
+                oldtime = time.time()
+                alpha = cv2.split(cv2.imread(img, cv2.IMREAD_UNCHANGED))[-1] # Get the alpha channel
+                image = cv2.imread(img)
+                newimg = sr.upsample(image)
+                newalpha = cv2.resize(alpha, (alpha.shape[0]*scalefactor, alpha.shape[1]*scalefactor), interpolation=cv2.INTER_CUBIC)
+                r,g,b = cv2.split(newimg)
+                newimg = cv2.merge([r,g,b,newalpha]) # Put together all the channels
+                cv2.imwrite(img, newimg)
+                print(f"Spent {time.time() - oldtime} seconds upscaling 4ch {img}")
+            except Exception as e:
+                print(f"Error {e} with {img}. Skipping.")
+                continue # Skip and continue to next image
+        elif len(cv2.split(cv2.imread(img, cv2.IMREAD_UNCHANGED))) == 3: # Image does not have alpha, just RGB
+            try:
+                oldtime = time.time()
+                image = cv2.imread(img)
+                newimg = sr.upsample(image)
+                cv2.imwrite(img, newimg)
+                print(f"Spent {time.time() - oldtime} seconds upscaling 3ch {img}")
+            except Exception as e:
+                print(f"Error {e} with {img}. Skipping.")
+                continue
+        else:
+            print(f"Error. Image {img} does not have 3 or 4 channels.")
+        
+        # Delete old images since they will not be used anymore
+        del newimg
+        del image
+        gc.collect()
+
 
 def extract(filename):
     data_zip = zipfile.ZipFile(f"./{filename}.zip", "r")
@@ -86,15 +106,15 @@ def main():
     
     oldtime = time.time()
     extract(folder)
-    print(f"\n Extracted {folder} in {time.time() - oldtime} seconds \n")
+    print(f"\nExtracted {folder} in {time.time() - oldtime} seconds \n")
 
     oldtime = time.time()
     upscale(scalefactor=scalefactor,algo=model)
-    print(f"\n Upscaled images {folder} in {time.time() - oldtime} seconds \n")
+    print(f"\nUpscaled images {folder} in {time.time() - oldtime} seconds \n")
 
     oldtime = time.time()
     finalize(scalefactor=scalefactor, name=folder)
-    print(f"\n Saved upscaled (x{scalefactor}) texturepack in {time.time() - oldtime} seconds \n")
+    print(f"\nSaved upscaled (x{scalefactor}) texturepack in {time.time() - oldtime} seconds \n")
 
 if __name__ == "__main__":
     main()
