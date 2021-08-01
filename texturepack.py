@@ -46,11 +46,19 @@ def upscale(scalefactor=4, algo="EDSR", use_cuda=True):
     imgs = glob.glob(path+ "/**/*.png",recursive=True)
 
     for i,img in enumerate(imgs):
-        oldtime = time.time()
-        image = cv2.imread(img, cv2.IMREAD_UNCHANGED)
-        newimg = sr.upsample(image)
-        cv2.imwrite(img, newimg)
-        print(f"Spent {time.time() - oldtime} seconds upscaling {img}")
+        try:
+            oldtime = time.time()
+            alpha = cv2.split(cv2.imread(img, cv2.IMREAD_UNCHANGED))[-1]
+            image = cv2.imread(img)
+            newimg = sr.upsample(image)
+            newalpha = cv2.resize(alpha, (alpha.shape[0]*scalefactor, alpha.shape[1]*scalefactor), interpolation=cv2.INTER_CUBIC)
+            r,g,b = cv2.split(newimg)
+            newimg = cv2.merge([r,g,b,newalpha])
+            cv2.imwrite(img, newimg)
+            print(f"Spent {time.time() - oldtime} seconds upscaling {img}")
+        except:
+            print(f"Error with {img}. Skipping.")
+            continue
 
 def extract(filename):
     data_zip = zipfile.ZipFile(f"./{filename}.zip", "r")
