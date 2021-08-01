@@ -58,6 +58,12 @@ def upscale(scalefactor=4, algo="EDSR", use_cuda=True):
                 newimg = cv2.merge([r,g,b,newalpha]) # Put together all the channels
                 cv2.imwrite(img, newimg)
                 print(f"Spent {time.time() - oldtime} seconds upscaling 4ch {img}")
+
+                # Delete old images since they will not be used anymore
+                del newimg
+                del image
+                gc.collect()
+
             except Exception as e:
                 print(f"Error {e} with {img}. Skipping.")
                 continue # Skip and continue to next image
@@ -68,16 +74,18 @@ def upscale(scalefactor=4, algo="EDSR", use_cuda=True):
                 newimg = sr.upsample(image)
                 cv2.imwrite(img, newimg)
                 print(f"Spent {time.time() - oldtime} seconds upscaling 3ch {img}")
+
+                # Delete old images since they will not be used anymore
+                del newimg
+                del image
+                gc.collect()
             except Exception as e:
                 print(f"Error {e} with {img}. Skipping.")
                 continue
         else:
-            print(f"Error. Image {img} does not have 3 or 4 channels.")
+            print(f"Error. Image {img} does not have 3 or 4 channels. It has {len(cv2.split(cv2.imread(img, cv2.IMREAD_UNCHANGED)))}")
         
-        # Delete old images since they will not be used anymore
-        del newimg
-        del image
-        gc.collect()
+        
 
 
 def extract(filename):
