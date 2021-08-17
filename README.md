@@ -23,12 +23,12 @@ Minecraft Texture Upscaler is built on **Python** and OpenCV's **contrib** modul
 7. Run texturepack.py, put in the required information, and enjoy! 
 
 Notes:
-* Type in the model to use in ALL CAPS.
-* The EDSR model supports x2, x3, and x4 upscaling. It produces the best results, but takes a lot of time to process images. 
-* The ESPCN model supports x2, x3, and x4 upscaling.
-* The FSRCNN model also supports x2, x3 and x4 upscaling.
-* The LapSRN model supports x2, x4, x8 upscaling.
-* By default, the program tries to use CUDA bindings, which will only work if you have compiled OpenCV from source with the appropriate flags, and will only work with an Nvidia GPU. If you do not have CUDA it will fall back to using the CPU, which is slower.
+* Type in the model to use as they are written below.
+* The **EDSR** model supports x2, x3, and x4 upscaling. It produces the best results, but takes a lot of time to process images. 
+* The **ESPCN** model supports x2, x3, and x4 upscaling.
+* The **FSRCNN** model also supports x2, x3 and x4 upscaling.
+* The **LapSRN** model supports x2, x4, x8 upscaling.
+* By default, the program tries to use CUDA bindings, which will only work if you have compiled OpenCV from source with the appropriate flags, and will only work with an Nvidia GPU. If you do not have CUDA it will fall back to using the CPU, which will take more time.
 
 ## Contributing
 Don't hesitate to submit an issue with an questions or concerns, or PRs with new functionality! Contributing is welcomed and appreciated!
