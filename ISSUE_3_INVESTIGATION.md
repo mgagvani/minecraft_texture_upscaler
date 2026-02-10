@@ -34,3 +34,17 @@ Observed on a representative texture (`assets/minecraft/textures/gui/sprites/hud
 Using a mini-pack extracted from the downloaded Furfsky zip:
 - Non-square RGBA texture upscaled successfully to the expected size.
 - Binary-alpha texture remained binary after upscaling (no semi-transparent alpha pixels).
+
+
+## Old-vs-new verification (explicit)
+Yes — old behavior was explicitly re-run and compared against the patched behavior on textures from the same downloaded pack.
+
+Results from the check script:
+- `crosshair.png` (binary alpha):
+  - Old path (`INTER_CUBIC` alpha): **212 semi-transparent alpha pixels** and 28 alpha levels.
+  - New path (binary alpha -> `INTER_NEAREST`): **0 semi-transparent alpha pixels** and 2 alpha levels (`0`/`255`).
+- `tab_bottom_unselected_7.png` (non-square RGBA):
+  - Old path (swapped width/height in alpha resize): merge failed.
+  - New path (correct `(width, height)`): merge succeeded with upscaled alpha shape `(64, 52)`.
+
+This confirms the old code path reproduced the defect conditions and the new path removes them for these representative textures.
