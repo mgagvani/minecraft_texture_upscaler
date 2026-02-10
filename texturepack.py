@@ -37,8 +37,11 @@ def upscale(scalefactor=4, algo="EDSR", use_cuda=True):
     sr.readModel(path)
 
     if use_cuda:# Set CUDA backend and target to enable GPU inference
-        sr.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
-        sr.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+        if cv2.cuda.getCudaEnabledDeviceCount() > 0:
+            sr.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+            sr.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+        else:
+            print("CUDA backend unavailable. Falling back to CPU.")
 
     # Set the desired model and scale to get correct pre- and post-processing
     sr.setModel(algo.lower(), scalefactor)
@@ -53,7 +56,14 @@ def upscale(scalefactor=4, algo="EDSR", use_cuda=True):
                 alpha = cv2.split(cv2.imread(img, cv2.IMREAD_UNCHANGED))[-1] # Get the alpha channel
                 image = cv2.imread(img)
                 newimg = sr.upsample(image)
-                newalpha = cv2.resize(alpha, (alpha.shape[0]*scalefactor, alpha.shape[1]*scalefactor), interpolation=cv2.INTER_CUBIC)
+                # Preserve hard edges for textures with binary alpha (common in item icons).
+                # Fall back to cubic for textures that already contain semi-transparency.
+                alpha_interpolation = cv2.INTER_NEAREST if len(set(alpha.flatten())) <= 2 else cv2.INTER_CUBIC
+                newalpha = cv2.resize(
+                    alpha,
+                    (alpha.shape[1] * scalefactor, alpha.shape[0] * scalefactor),
+                    interpolation=alpha_interpolation,
+                )
                 r,g,b = cv2.split(newimg)
                 newimg = cv2.merge([r,g,b,newalpha]) # Put together all the channels
                 cv2.imwrite(img, newimg)
